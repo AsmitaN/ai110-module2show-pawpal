@@ -4,8 +4,28 @@
 
 **a. Initial design**
 
+class ClassName {
+        +type attribute
+        +method() returnType
+    }
+
+    class AnotherClass {
+        +type attribute
+        +method() returnType
+    }
+
+    ClassName --> AnotherClass : relationship
+
+
+Design a UML class diagram for a pet care app with Owner, Pet, Task, and Schedule classes. Explain the relationships. Provide the the UML diagram as Mermaid.js code
+
 - Briefly describe your initial UML design.
+Three core actions:
+    1) Add a pet
+    2) Add a task
+    3) View the daily schedule of tasks
 - What classes did you include, and what responsibilities did you assign to each?
+    I included the classes Owner, Pet, Task, and Schedule. The Owner class can add pets and create schedules. The Pet class can return pet-speific information. The Task class can be used to determine the priority level of the given task. The Schedule class can organize tasks by priority and add new tasks.
 
 **b. Design changes**
 

@@ -1,0 +1,34 @@
+classDiagram
+    %% Replace the placeholders below with your actual classes, attributes, methods, and relationships.
+    %% Keep this file updated so it matches your final implementation.
+
+    class Owner {
+        +name: str
+        +pets: List~Pet~
+        +schedule: Schedule
+        +add_pet(pet: Pet) None
+        +create_schedule(tasks: List~Task~) Schedule
+    }
+
+    class Pet {
+        +name: str
+        +species: str
+        +get_info() str
+    }
+
+    class Task {
+        +title: str
+        +duration_minutes: int
+        +priority: str
+        +get_priority_level() int
+    }
+
+    class Schedule {
+        +tasks: List~Task~
+        +add_task(task: Task) None
+        +get_tasks_by_priority() List~Task~
+    }
+
+    Owner *-- Pet : owns
+    Owner *-- Schedule : has
+    Schedule *-- Task : contains
