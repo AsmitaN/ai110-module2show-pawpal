@@ -26,6 +26,9 @@ class Task:
     def get_priority_level(self) -> int:
         priority_map = {"low": 1, "medium": 2, "high": 3}
         return priority_map.get(self.priority.lower(), 0)
+    
+    def get_info(self) -> str:
+        return f"{self.time} - ({self.description}) ({self.duration} mins) [{self.priority}], {self.completion_status}"
 
 # The "Brain" that retrieves, organizes, and manages tasks across pets.
 class Scheduler:
