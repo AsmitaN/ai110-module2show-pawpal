@@ -29,7 +29,7 @@ first_owner.scheduler = pawpal_system.Scheduler(first_owner.pets)
 first_owner.scheduler.retrieve_all_tasks()
 print("Today's Schedule")
 for pet in first_owner.pets:
-    print(pet.name + " (" + pet.species + ")")
+    pet.get_info()
     for task in first_owner.scheduler.tasks:
         if task in pet.tasks:
             print(task.time + " - " + task.description + " (" + str(task.duration) + "mins)" + " [" + task.priority + "]" + ", " + task.completion_status)
