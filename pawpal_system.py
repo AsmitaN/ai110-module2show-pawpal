@@ -7,6 +7,10 @@ class Pet:
         self.species: str = species
         self.tasks: List[Task] = []
     
+    def get_name(self) -> str:
+        """Return a string with the pet's name."""
+        return f"{self.name}"
+
     def get_info(self) -> str:
         """Return a formatted string with the pet's name and species."""
         return f"{self.name} ({self.species})"
