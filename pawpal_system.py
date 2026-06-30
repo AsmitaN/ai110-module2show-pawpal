@@ -17,12 +17,12 @@ class Pet:
 
 # Represents a single activity (description, time, frequency, priority, completion status).
 class Task:
-    def __init__(self, description: str, time: str, duration: int, frequency: str, priority: str, completion_status: str = "pending"):
+    def __init__(self, description: str, duration: int, frequency: str, priority: str, time: str = "00:00", completion_status: str = "pending"):
         self.description = description
-        self.time = time
         self.duration = duration
         self.frequency = frequency
         self.priority = priority
+        self.time = time
         self.completion_status = completion_status
     
     def get_priority_level(self) -> int:
@@ -32,7 +32,7 @@ class Task:
     
     def get_info(self) -> str:
         """Return a formatted string with the task's details."""
-        return f"{self.time} - ({self.description}) ({self.duration} mins) [{self.priority}], {self.completion_status}"
+        return f"{self.time} - {self.description} ({self.duration} mins) [{self.priority}], {self.completion_status}"
     
     def mark_complete(self):
         """Mark the task as complete."""

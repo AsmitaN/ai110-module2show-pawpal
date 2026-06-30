@@ -11,15 +11,15 @@ first_owner.add_pet(fish)
 #for pet in first_owner.pets:
 #    print(pet.get_info())
 
-dog_morning_walk = pawpal_system.Task("Morning walk", "08:00", 30, "Daily", "high")
-dog_feeding = pawpal_system.Task("Feeding", "09:00", 10, "Twice a day", "high")
+dog_morning_walk = pawpal_system.Task("Morning walk", 30, "Daily", "high", "08:00")
+dog_feeding = pawpal_system.Task("Feeding", 10, "Twice a day", "high", "09:00")
 dog.add_task(dog_morning_walk)
 dog.add_task(dog_feeding)
 
 #for task in dog.tasks:
 #    print(task.description, task.duration, task.frequency, task.priority, task.completion_status) 
 
-fish_feeding = pawpal_system.Task("Feeding", "10:00", 5, "Daily", "high")
+fish_feeding = pawpal_system.Task("Feeding", 5, "Daily", "high", "10:00")
 fish.add_task(fish_feeding)
 
 #for task in fish.tasks:
