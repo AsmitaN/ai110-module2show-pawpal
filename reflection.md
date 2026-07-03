@@ -29,8 +29,9 @@ Three core actions:
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
+    This checks only for exact time matches instead of overlapping durations. 
 - Why is that tradeoff reasonable for this scenario?
-
+    Suppose two tasks are scheduled at the same time but have different durations (so one task's duration would be smaller than that of the other). The owner could potentially complete the longer-duration task before the shorter-duration task (or the other way around) but this means that the time for the shorter-duration would have to be changed. This could confuse the owner because the task time can't be adjusted after its instance is created, so the task moved later in the hour would still have the same hour as the other task.
 ---
 
 ## 3. AI Collaboration

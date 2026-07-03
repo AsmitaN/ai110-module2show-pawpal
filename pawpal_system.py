@@ -29,10 +29,8 @@ class Pet:
 # Represents a single activity (description, time, frequency, priority, completion status).
 class Task:
     FREQUENCY_INTERVALS = {
-        "Hourly": timedelta(hours=1),
         "Daily": timedelta(days=1),
         "Weekly": timedelta(weeks=1),
-        "Monthly": timedelta(days=30),
     }
 
     def __init__(self, description: str, duration: int, frequency: str, priority: str, time: str, completion_status: str = "pending", due_date: date = date.today()):
@@ -54,31 +52,19 @@ class Task:
         return f"{self.due_date} {self.time} - {self.description} ({self.duration} mins) [{self.priority}], {self.completion_status}"
 
     def mark_complete(self):
-        """Mark the task as complete and advance due_date if frequency is recognized."""
+        """Mark the task as complete and advance due_date."""
         self.completion_status = "complete"
         interval = self.FREQUENCY_INTERVALS.get(self.frequency)
         if interval:
-            if self.frequency == "Hourly":
-                dt = datetime.strptime(f"{self.due_date} {self.time}", "%Y-%m-%d %H:%M")
-                dt += interval
-                self.due_date = dt.date()
-                self.time = dt.strftime("%H:%M")
-            else:
-                self.due_date += interval
+            self.due_date += interval
             self.completion_status = "pending"
-            print("New due time: " + str(self.time))
+            print("New due date: " + str(self.due_date))
 
 # The "Brain" that retrieves, organizes, and manages tasks across pets.
 class Scheduler:
     def __init__(self, pets: List['Pet']):
         self.pets = pets
         self.tasks: List[Task] = []
-
-    def get_pending_tasks(self) -> List[Task]:
-        return [task for task in self.tasks if task.completion_status == "pending"]
-
-    def get_tasks_for_pet(self, pet: Pet) -> List[Task]:
-        return pet.tasks
 
     def sort_by_time(self, pets: List[Pet]) -> List[Task]:
         """Sort tasks from given pets by earliest to latest time (HH:MM format)."""
@@ -88,6 +74,7 @@ class Scheduler:
         return sorted(tasks, key=lambda task: tuple(map(int, task.time.split(':'))))
 
     def get_pet_by_name(self, pet_name: str) -> Pet:
+        """Return a Pet object with the corresponding pet_name."""
         return next((p for p in self.pets if p.name == pet_name), None)
 
     def filter_tasks(self, completion_status: str = None, pet_name: str = None) -> List[Task]:
@@ -114,7 +101,7 @@ class Scheduler:
         for i, (pet1, task1) in enumerate(all_tasks):
             for pet2, task2 in all_tasks[i+1:]:
                 if task1.due_date == task2.due_date and task1.time == task2.time:
-                    print(f"⚠️  CROSS-PET CONFLICT: {pet1.name} and {pet2.name} have tasks at the same time!")
+                    print(f"⚠️  CROSS-PET CONFLICT: {pet1.name} and {pet2.name} have tasks at the same time! Newest task not added, schedule for different time.")
                     print(f"   {pet1.name}: {task1.description} at {task1.time} on {task1.due_date}")
                     print(f"   {pet2.name}: {task2.description} at {task2.time} on {task2.due_date}")
 

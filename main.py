@@ -10,7 +10,7 @@ first_owner.add_pet(fish)
 
 #for pet in first_owner.pets:
 #    print(pet.get_info())
-dog_feeding = pawpal_system.Task("Feeding", 10, "Hourly", "high", "09:00")
+dog_feeding = pawpal_system.Task("Feeding", 10, "Daily", "high", "09:00")
 dog.add_task(dog_feeding)
 
 #for task in dog.tasks:
@@ -18,9 +18,9 @@ dog.add_task(dog_feeding)
 
 fish_feeding = pawpal_system.Task("Feeding", 5, "Daily", "high", "10:00")
 fish.add_task(fish_feeding)
-dog_morning_walk = pawpal_system.Task("Morning walk", 30, "Hourly", "high", "08:00")
+dog_morning_walk = pawpal_system.Task("Morning walk", 30, "Daily", "high", "08:00")
 dog.add_task(dog_morning_walk)
-clean_tank = pawpal_system.Task("Clean tank", 5, "Daily", "high", "10:00")
+clean_tank = pawpal_system.Task("Clean tank", 5, "Weekly", "high", "11:00")
 fish.add_task(clean_tank)
 
 #for task in fish.tasks:
@@ -45,10 +45,10 @@ print(first_owner.pets[0].get_info())
 for i in range(len(filtered_schedule)):
     print(filtered_schedule[i].get_info())
 
-first_owner.scheduler.tasks[1].mark_complete()
+first_owner.scheduler.tasks[3].mark_complete()
+
 
 print("Today's Schedule (filtered by completion status - after marking a daily task complete)")
-print("Note: Daily tasks auto-recur, so the marked task's due_date advanced and status reset to pending.")
 filtered_schedule = first_owner.scheduler.filter_tasks("pending")
 
 for pet in first_owner.pets:
