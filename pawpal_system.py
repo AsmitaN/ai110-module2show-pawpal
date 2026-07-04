@@ -85,7 +85,7 @@ class Scheduler:
         return next((p for p in self.pets if p.name == pet_name), None)
 
     def filter_tasks(self, completion_status: str = None, pet_name: str = None) -> List[Task]:
-        """Filter tasks by completion status and/or pet name."""
+        """Filter tasks by completion status or pet name."""
         filtered = self.tasks
 
         if completion_status:
@@ -112,7 +112,7 @@ class Scheduler:
         # signals that there is no scheduling conflict after looping through each pet
         return False
     
-    def retrieve_all_tasks(self) -> List[Task]:
+    def retrieve_all_tasks(self):
         """Retrieve and aggregate all tasks from all pets."""
         self.tasks.clear()
         for pet in self.pets:

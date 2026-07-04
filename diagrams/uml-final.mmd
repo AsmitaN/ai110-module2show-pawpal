@@ -1,0 +1,50 @@
+classDiagram
+    %% Final UML diagram reflecting the actual PawPal+ implementation
+
+    class Owner {
+        +name: str
+        +pets: List~Pet~
+        +scheduler: Scheduler
+        +add_pet(pet: Pet) None
+    }
+
+    class Pet {
+        +name: str
+        +species: str
+        +tasks: List~Task~
+        +get_name() str
+        +get_info() str
+    }
+
+    class Task {
+        +description: str
+        +duration: int
+        +frequency: str
+        +priority: str
+        +time: str
+        +due_date: date
+        +completion_status: str
+        +FREQUENCY_INTERVALS: dict
+        +get_priority_level() int
+        +get_info() str
+        +mark_complete() None
+    }
+
+    class Scheduler {
+        +pets: List~Pet~
+        +tasks: List~Task~
+        +print_schedule(pets: List~Pet~, schedule: List~Task~, pet_name: str) None
+        +sort_by_time(pets: List~Pet~) List~Task~
+        +get_pet_by_name(pet_name: str) Pet
+        +filter_tasks(completion_status: str, pet_name: str) List~Task~
+        +check_scheduling_conflicts(pet_name: str, task: Task) bool
+        +retrieve_all_tasks() None
+        +add_task(pet_name: str, task: Task) bool
+        +reset_completed_tasks_to_pending() None
+    }
+
+    Owner *-- Pet : owns
+    Owner *-- Scheduler : has
+    Pet *-- Task : contains
+    Scheduler --> Pet : manages
+    Scheduler --> Task : schedules

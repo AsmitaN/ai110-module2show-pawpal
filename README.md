@@ -22,6 +22,13 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Features
+
+- **Sorting by Time** — Tasks are automatically sorted by date and time, displaying them in chronological order across all pets
+- **Conflict Warnings** — The system detects and prevents scheduling conflicts by warning when a task is assigned to the same time slot as an existing task
+- **Daily/Weekly Recurrence** — Tasks marked as complete automatically advance to the next day/week, enabling recurring daily/weekly pet care activities
+- **Filter by Pet/Status** — View tasks filtered by specific pet or completion status (pending/complete) for focused scheduling
+
 ## Getting started
 
 ### Setup
@@ -47,7 +54,7 @@ pip install -r requirements.txt
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
 ```
-Today's Schedule
+Full Schedule
 Alice (Husky)
 2026-07-04 09:00 - Feeding (10 mins) [high], pending
 2026-07-04 08:00 - Morning walk (30 mins) [high], pending
@@ -147,7 +154,7 @@ Confidence level: 4 stars
 |---------|-----------|-------|
 | Task sorting | Scheduler.sort_by_time() | by time |
 | Collecting tasks from all pets | Scheduler.retrieve_all_tasks() | must call this before first Scheduler.filter_tasks() call so that tasks field is non-empty |
-| Filtering | Scheduler.filter_tasks() | by pet_name and/or completion_status |
+| Filtering | Scheduler.filter_tasks() | by pet_name or completion_status |
 | Conflict handling | Scheduler.check_scheduling_conflicts() | overlapping time slots |
 | Recurring tasks | Task.mark_complete() | daily vs. weekly |
 
@@ -155,10 +162,45 @@ Confidence level: 4 stars
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. There is already an owner created, but if you want to create a new one, first fill in the owner name field then click the "Create Owner" button.
+2. If you want to add a new pet to an existing owner, type in the owner name, pet name, and pet species, then click the "Add Pet" button.
+3. To add a new task, select an owner and pet, enter a description and duration, select a frequency and priority, and enter the time to complete it by. If the new task is scheduled at the same time as an existing task, a warning will be displayed and the new task won't be added to the schedule.
+4. To build a schedule, select an owner and perform one (or none if you want a general list) of the following actions: select a pet, select a completion_status, or check the "Sort by the earliest datetime" checkbox. 
+5. To mark a task as complete, select an owner, a pet, and the task description corresponding to the task.
+
+Sample CLI output after running main.py:
+```
+Full Schedule
+Alice (Husky)
+2026-07-04 09:00 - Feeding (10 mins) [high], pending
+2026-07-04 08:00 - Morning walk (30 mins) [high], pending
+Bubble (Goldfish)
+2026-07-06 10:00 - Feeding (5 mins) [high], pending
+2026-07-04 11:00 - Clean tank (5 mins) [high], pending
+Full Schedule (sorted by earliest to latest datetime)
+Alice (Husky)
+2026-07-04 08:00 - Morning walk (30 mins) [high], pending
+2026-07-04 09:00 - Feeding (10 mins) [high], pending
+Bubble (Goldfish)
+2026-07-04 11:00 - Clean tank (5 mins) [high], pending
+2026-07-06 10:00 - Feeding (5 mins) [high], pending
+Full Schedule (filtered by pet name)
+Alice (Husky)
+2026-07-04 09:00 - Feeding (10 mins) [high], pending
+2026-07-04 08:00 - Morning walk (30 mins) [high], pending
+Full Schedule (filtered by completion status - after marking a daily task complete)
+Alice (Husky)
+2026-07-04 09:00 - Feeding (10 mins) [high], pending
+2026-07-04 08:00 - Morning walk (30 mins) [high], pending
+Bubble (Goldfish)
+2026-07-04 11:00 - Clean tank (5 mins) [high], pending
+Full Schedule (sorted by earliest to latest datetime) - after resetting completed daily task to pending
+Alice (Husky)
+2026-07-04 08:00 - Morning walk (30 mins) [high], pending
+2026-07-04 09:00 - Feeding (10 mins) [high], pending
+Bubble (Goldfish)
+2026-07-04 11:00 - Clean tank (5 mins) [high], pending
+2026-07-07 10:00 - Feeding (5 mins) [high], pending
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
