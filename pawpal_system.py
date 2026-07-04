@@ -16,16 +16,6 @@ class Pet:
         """Return a formatted string with the pet's name and species."""
         return f"{self.name} ({self.species})"
 
-    def add_task(self, task: 'Task') -> None:
-        """Add a task to the pet's task list and check for scheduling conflicts."""
-        for existing_task in self.tasks:
-            if existing_task.due_date == task.due_date and existing_task.time == task.time:
-                print(f"⚠️  WARNING: Scheduling conflict for {self.name}!")
-                print(f"   Task 1: {existing_task.description} at {existing_task.time} on {existing_task.due_date}")
-                print(f"   Task 2: {task.description} at {task.time} on {task.due_date}")
-                return
-        self.tasks.append(task)
-
 # Represents a single activity (description, time, frequency, priority, completion status).
 class Task:
     FREQUENCY_INTERVALS = {
@@ -45,20 +35,20 @@ class Task:
     def get_priority_level(self) -> int:
         """Return the numeric priority level (1=low, 2=medium, 3=high)."""
         priority_map = {"low": 1, "medium": 2, "high": 3}
-        return priority_map.get(self.priority.lower(), 0)
+        # converts priority to numerical version so that it is easier to compare against other tasks
+        return priority_map.get(self.priority, 0)
 
     def get_info(self) -> str:
         """Return a formatted string with the task's details."""
         return f"{self.due_date} {self.time} - {self.description} ({self.duration} mins) [{self.priority}], {self.completion_status}"
 
     def mark_complete(self):
-        """Mark the task as complete and advance due_date."""
+        """Mark the task as complete and advance due_date if recurring."""
         self.completion_status = "complete"
         interval = self.FREQUENCY_INTERVALS.get(self.frequency)
         if interval:
             self.due_date += interval
-            self.completion_status = "pending"
-            print("New due date: " + str(self.due_date))
+            #print("New due date: " + str(self.due_date))
 
 # The "Brain" that retrieves, organizes, and manages tasks across pets.
 class Scheduler:
@@ -66,11 +56,26 @@ class Scheduler:
         self.pets = pets
         self.tasks: List[Task] = []
 
+    def print_schedule(self, pets: List[Pet], schedule: List['Task']=None):
+        for pet in pets:
+            print(pet.get_info())
+            schedule_to_print = []
+            # executes if a sorted/filtered schedule is passed
+            if schedule:
+                schedule_to_print = schedule
+            # executes if no second argument was passed technically
+            else:
+                schedule_to_print = self.tasks
+            for task in schedule_to_print:
+                if task in pet.tasks:
+                    print(task.get_info())
+
     def sort_by_time(self, pets: List[Pet]) -> List[Task]:
         """Sort tasks from given pets by earliest to latest time (HH:MM format)."""
         tasks = []
         for pet in pets:
             tasks.extend(pet.tasks)
+        # converts to an actual time then sorts in order
         return sorted(tasks, key=lambda task: tuple(map(int, task.time.split(':'))))
 
     def get_pet_by_name(self, pet_name: str) -> Pet:
@@ -91,25 +96,44 @@ class Scheduler:
 
         return filtered
 
-    def check_scheduling_conflicts(self) -> None:
-        """Check for scheduling conflicts across all pets (any number) and print warnings."""
-        all_tasks = []
+    def check_scheduling_conflicts(self, pet_name: str, task: 'Task') -> bool:
+        """Check if a task conflicts with existing tasks. Returns True if conflict exists, False if no conflict."""
         for pet in self.pets:
-            for task in pet.tasks:
-                all_tasks.append((pet, task))
-
-        for i, (pet1, task1) in enumerate(all_tasks):
-            for pet2, task2 in all_tasks[i+1:]:
-                if task1.due_date == task2.due_date and task1.time == task2.time:
-                    print(f"⚠️  CROSS-PET CONFLICT: {pet1.name} and {pet2.name} have tasks at the same time! Newest task not added, schedule for different time.")
-                    print(f"   {pet1.name}: {task1.description} at {task1.time} on {task1.due_date}")
-                    print(f"   {pet2.name}: {task2.description} at {task2.time} on {task2.due_date}")
-
+            for existing_task in pet.tasks:
+                # checks if the time and date of an existing task coincides with the new task (same/different pets included)
+                if existing_task.due_date == task.due_date and existing_task.time == task.time:
+                    print(f"⚠️  CONFLICT DETECTED: Task '{task.description}' conflicts with existing task!")
+                    print(f"   Existing: {existing_task.description} at {existing_task.time} on {existing_task.due_date} for {pet.name}")
+                    print(f"   New task: {task.description} at {task.time} on {task.due_date} for {pet_name}")
+                    # signals that scheduling conflict exists
+                    return True
+        # signals that there is no scheduling conflict after looping through each pet
+        return False
+    
     def retrieve_all_tasks(self) -> List[Task]:
         """Retrieve and aggregate all tasks from all pets."""
         self.tasks.clear()
         for pet in self.pets:
             self.tasks.extend(pet.tasks)
+
+    def add_task(self, pet_name: str, task: 'Task') -> bool:
+        """Add a task to a pet after checking for scheduling conflicts. Returns True if added, False if conflict blocked it."""
+        pet = self.get_pet_by_name(pet_name)
+
+        if self.check_scheduling_conflicts(pet_name, task):
+            print(f"❌ Task not added due to scheduling conflict.")
+            return False
+
+        pet.tasks.append(task)
+        # updates the scheduler's common list of tasks after every new task is added to a pet
+        self.retrieve_all_tasks()
+        return True
+
+    def reset_completed_tasks_to_pending(self) -> None:
+        """Reset all tasks with completion_status 'complete' back to 'pending'."""
+        for task in self.tasks:
+            if task.completion_status == "complete":
+                task.completion_status = "pending"
 
 # Owner: Manages multiple pets and provides access to all their tasks.
 class Owner:
