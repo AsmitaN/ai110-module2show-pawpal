@@ -58,16 +58,18 @@ def test_add_task_drops_conflicting_same_time_task():
 # ============================================================================
 
 def test_sort_by_time_orders_across_pets():
-    """Verify sort_by_time orders tasks from multiple pets earliest to latest, regardless of which pet owns them."""
+    """Verify sort_by_time orders tasks from multiple pets earliest to latest by datetime, regardless of which pet owns them."""
+    today = date.today()
     dog = pawpal_system.Pet("Rex", "Dog")
     cat = pawpal_system.Pet("Momo", "Cat")
     scheduler = pawpal_system.Scheduler([dog, cat])
-    scheduler.add_task(dog.name, pawpal_system.Task("Walk", 30, "Daily", "high", "14:00"))
-    scheduler.add_task(cat.name, pawpal_system.Task("Feed", 10, "Daily", "high", "08:00"))
-    scheduler.add_task(dog.name, pawpal_system.Task("Groom", 20, "Weekly", "low", "10:00"))
+    scheduler.add_task(dog.name, pawpal_system.Task("Walk", 30, "Daily", "high", "14:00", due_date=today))
+    scheduler.add_task(cat.name, pawpal_system.Task("Feed", 10, "Daily", "high", "08:00", due_date=today+timedelta(days=2)))
+    scheduler.add_task(dog.name, pawpal_system.Task("Groom", 20, "Weekly", "low", "10:00", due_date=today))
 
-    print(f"\n⏰ TEST: Sort By Time (Across Multiple Pets)")
+    print(f"\n⏰ TEST: Sort By DateTime (Across Multiple Pets)")
     print(f"   Pets: {dog.name}, {cat.name}")
+    print(f"   Date: {today}")
     print(f"   Tasks added (unordered):")
     for pet in [dog, cat]:
         for task in pet.tasks:
@@ -76,12 +78,22 @@ def test_sort_by_time_orders_across_pets():
     scheduler = pawpal_system.Scheduler([dog, cat])
     ordered = scheduler.sort_by_time([dog, cat])
 
-    print(f"   After sorting by time:")
-    times = [task.time for task in ordered]
+    print(f"   After sorting by datetime:")
     for i, task in enumerate(ordered):
-        print(f"     {i+1}. {task.description} at {task.time}")
+        print(f"     {i+1}. {task.description} at {task.time} on {task.due_date}")
 
-    assert times == ["08:00", "10:00", "14:00"]
+    # Assert the tasks are sorted by earliest to latest datetime (date first, then time)
+    assert len(ordered) == 3, f"Expected 3 tasks, got {len(ordered)}"
+
+    # Check each task in order
+    assert ordered[0].description == "Groom" and ordered[0].due_date == today and ordered[0].time == "10:00"
+    assert ordered[1].description == "Walk" and ordered[1].due_date == today and ordered[1].time == "14:00"
+    assert ordered[2].description == "Feed" and ordered[2].due_date == today + timedelta(days=2) and ordered[2].time == "08:00"
+
+    # Verify the datetimes are in ascending order
+    datetimes = [(task.due_date, task.time) for task in ordered]
+    assert datetimes == [(today, "10:00"), (today, "14:00"), (today + timedelta(days=2), "08:00")]
+
     print(f"   ✅ Test passed!\n")
 
 

@@ -49,11 +49,11 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 ```
 Today's Schedule
 Alice (Husky)
-2026-07-03 09:00 - Feeding (10 mins) [high], pending
-2026-07-03 08:00 - Morning walk (30 mins) [high], pending
+2026-07-04 09:00 - Feeding (10 mins) [high], pending
+2026-07-04 08:00 - Morning walk (30 mins) [high], pending
 Bubble (Goldfish)
-2026-07-03 10:00 - Feeding (5 mins) [high], pending
-2026-07-03 11:00 - Clean tank (5 mins) [high], pending
+2026-07-06 10:00 - Feeding (5 mins) [high], pending
+2026-07-04 11:00 - Clean tank (5 mins) [high], pending
 ```
 
 ## 🧪 Testing PawPal+
@@ -100,16 +100,17 @@ tests/test_pawpal.py::test_add_task_drops_conflicting_same_time_task
 
 PASSED
 tests/test_pawpal.py::test_sort_by_time_orders_across_pets 
-⏰ TEST: Sort By Time (Across Multiple Pets)
+⏰ TEST: Sort By DateTime (Across Multiple Pets)
    Pets: Rex, Momo
+   Date: 2026-07-03
    Tasks added (unordered):
      - Walk (14:00) - Rex
      - Groom (10:00) - Rex
      - Feed (08:00) - Momo
-   After sorting by time:
-     1. Feed at 08:00
-     2. Groom at 10:00
-     3. Walk at 14:00
+   After sorting by datetime:
+     1. Feed at 08:00 on 2026-07-03
+     2. Groom at 10:00 on 2026-07-03
+     3. Walk at 14:00 on 2026-07-03
    ✅ Test passed!
 
 PASSED
@@ -137,7 +138,7 @@ tests/test_pawpal.py::test_filter_tasks_for_pet_with_no_tasks
 
 PASSED
 
-============================================================================== 5 passed in 0.01s ==============================================================================
+================================================================== 5 passed in 0.02s ==================================================================
 ```
 Confidence level: 4 stars
 ## 📐 Smarter Scheduling

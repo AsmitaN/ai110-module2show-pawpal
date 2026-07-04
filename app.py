@@ -1,5 +1,5 @@
 import streamlit as st
-from pawpal_system import Owner, Pet, Task
+from pawpal_system import Owner, Pet, Task, Scheduler
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -105,11 +105,11 @@ if "tasks" not in st.session_state:
 
 col1, col2 = st.columns(2)
 with col1:
-    owner_name = st.selectbox("Owner", options=list(st.session_state.owners.keys()), index=0)
+    owner_name = st.selectbox("Owner", options=list(st.session_state.owners.keys()), index=0, key="owner_name_tasks")
     current_owner = st.session_state.owners[owner_name]
 with col2:
     current_owner = st.session_state.owners[owner_name]
-    pet = st.selectbox("Pet", options=(pet.name for pet in current_owner.pets), index=0)
+    pet_name = st.selectbox("Pet", options=(pet.name for pet in current_owner.pets), index=0, key="owner_pet_name_tasks")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -119,19 +119,41 @@ with col2:
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    frequency = st.selectbox("Frequency", ["Hourly", "Daily", "Weekly"], index=0)
+    frequency = st.selectbox("Frequency", ["Daily", "Weekly"], index=0)
 with col2:
     priority = st.selectbox("Priority", ["low", "medium", "high"], index=0)
 with col3:
     time = st.text_input("Time to complete by", placeholder="Enter in HH:MM format")
 
+current_owner.scheduler = Scheduler(current_owner.pets)
+
 if st.button("Add task"):
     if task_description!="" and duration!="" and frequency!="" and priority!="" and time!="":
         new_task = Task(task_description, duration, frequency, priority, time)
-        
+        time_conflict_exists = current_owner.scheduler.check_scheduling_conflicts(pet_name, new_task)
+        if time_conflict_exists == False:
+            current_owner.scheduler.add_task(pet_name, new_task)
+            st.success(f"Added new task: {task_description} - {pet_name}")
+        else:
+            st.warning("⚠️ TIME CONFLICT DETECTED. See terminal for more details")
+
     else:
         st.error("Please enter all values needed to add a new task")
         st.stop()
+
+# Debug: Display all created tasks
+st.markdown("### 🐛 Debug: Created Tasks")
+with st.expander("Show all tasks by pet", expanded=False):
+    if current_owner.pets:
+        for pet in current_owner.pets:
+            st.write(f"**{pet.get_info()}**")
+            if pet.tasks:
+                for task in pet.tasks:
+                    st.write(f"  - {task.get_info()}")
+            else:
+                st.write("  *(no tasks)*")
+    else:
+        st.info("No pets created yet.")
 
 if st.session_state.tasks:
     st.write("Current tasks:")
@@ -142,18 +164,89 @@ else:
 st.divider()
 
 st.subheader("Build Schedule")
-st.caption("This button should call your scheduling logic once you implement it.")
+
+owner_name = st.selectbox("Owner", options=list(st.session_state.owners.keys()), index=0, key="owner_name_schedule")
+current_owner = st.session_state.owners[owner_name]
+if current_owner.scheduler:
+    current_owner.scheduler.retrieve_all_tasks()
+    current_owner.scheduler.reset_completed_tasks_to_pending()
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    pet_options = [""] + [pet.name for pet in current_owner.pets]
+    pet_name = st.selectbox("Pet", options=pet_options, index=0, key="owner_pet_name_schedule")
+with col2:
+    completion_options = ["", "pending", "complete"]
+    completion_status = st.selectbox("Completion Status", options=completion_options, index=0)
+with col3:
+    sort_by_time = st.checkbox("Sort by earliest datetime", value=False)
 
 if st.button("Generate schedule"):
-    st.warning(
-        "Not implemented yet. Next step: create your scheduling logic (classes/functions) and call it here."
-    )
-    st.markdown(
-        """
-Suggested approach:
-1. Design your UML (draft).
-2. Create class stubs (no logic).
-3. Implement scheduling behavior.
-4. Connect your scheduler here and display results.
-"""
-    )
+    schedule_to_display = None
+
+    if pet_name:
+        schedule_to_display = current_owner.scheduler.filter_tasks(pet_name=pet_name)
+        st.subheader(f"Schedule for {pet_name}")
+    elif completion_status:
+        schedule_to_display = current_owner.scheduler.filter_tasks(completion_status=completion_status)
+        st.subheader(f"Schedule ({completion_status} tasks)")
+    elif sort_by_time:
+        schedule_to_display = current_owner.scheduler.sort_by_time(current_owner.pets)
+        st.subheader("Schedule (sorted by earliest datetime)")
+    else:
+        schedule_to_display = current_owner.scheduler.tasks
+        st.subheader("Full Schedule")
+
+    if schedule_to_display:
+        # Convert tasks to table format with pet name
+        task_data = []
+        for task in schedule_to_display:
+            # Find which pet this task belongs to
+            pet_owner = ""
+            for pet in current_owner.pets:
+                if task in pet.tasks:
+                    pet_owner = pet.name
+                    break
+
+            task_data.append({
+                "Pet": pet_owner,
+                "Date": str(task.due_date),
+                "Time": task.time,
+                "Task": task.description,
+                "Duration (mins)": task.duration,
+                "Frequency": task.frequency,
+                "Priority": task.priority,
+                "Status": task.completion_status
+            })
+
+        if task_data:
+            st.table(task_data)
+        else:
+            st.info("No tasks found for this filter.")
+    else:
+        st.info("No tasks found for this filter.")
+
+st.subheader("Completed a task?")
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    owner_name = st.selectbox("Owner", options=list(st.session_state.owners.keys()), index=0, key="owner_name_mark_complete")
+    current_owner = st.session_state.owners[owner_name]
+with col2:
+    pet_name = st.selectbox("Pet", options=(pet.name for pet in current_owner.pets), index=0, key="owner_pet_name_mark_complete")
+if current_owner.scheduler:
+    with col3:
+        selected_pet_tasks = [task for pet in current_owner.pets if pet.name == pet_name for task in pet.tasks]
+        task_description = st.selectbox("Task description", options=(task.description for task in selected_pet_tasks), index=0, key="owner_task_name_mark_complete")
+
+if st.button("Submit"):
+    for pet in current_owner.pets:
+        if pet_name == pet.name:
+            for task in pet.tasks:
+                if task_description == task.description:
+                    task.mark_complete()
+                    print("BEFORE RESET: Marked as complete?: " + str(task.completion_status == "complete"))
+                    st.success(f"{task_description} marked as complete (and will be reset to pending after this message)")
+                    current_owner.scheduler.reset_completed_tasks_to_pending()
+                    print("AFTER RESET: Marked as complete?: " + str(task.completion_status == "complete"))

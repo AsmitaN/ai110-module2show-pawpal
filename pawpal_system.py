@@ -1,5 +1,5 @@
 from typing import List
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 
 # Stores pet details and a list of tasks.
 class Pet:
@@ -56,7 +56,7 @@ class Scheduler:
         self.pets = pets
         self.tasks: List[Task] = []
 
-    def print_schedule(self, pets: List[Pet], schedule: List['Task']=None):
+    def print_schedule(self, pets: List[Pet], schedule: List['Task']=None, pet_name: str = None):
         for pet in pets:
             print(pet.get_info())
             schedule_to_print = []
@@ -69,14 +69,16 @@ class Scheduler:
             for task in schedule_to_print:
                 if task in pet.tasks:
                     print(task.get_info())
+            if pet_name:
+                break
 
     def sort_by_time(self, pets: List[Pet]) -> List[Task]:
-        """Sort tasks from given pets by earliest to latest time (HH:MM format)."""
+        """Sort tasks from given pets by earliest to latest datetime (date first, then time)."""
         tasks = []
         for pet in pets:
             tasks.extend(pet.tasks)
-        # converts to an actual time then sorts in order
-        return sorted(tasks, key=lambda task: tuple(map(int, task.time.split(':'))))
+        # Sort by due_date first, then by time (HH:MM format)
+        return sorted(tasks, key=lambda task: (task.due_date, tuple(map(int, task.time.split(':')))))
 
     def get_pet_by_name(self, pet_name: str) -> Pet:
         """Return a Pet object with the corresponding pet_name."""
@@ -145,8 +147,3 @@ class Owner:
     def add_pet(self, pet: Pet) -> None:
         """Add a pet to the owner's pet list."""
         self.pets.append(pet)
-    
-    def create_schedule(self) -> Scheduler:
-        """Create and return a scheduler for managing the owner's pets' tasks."""
-        self.scheduler = Scheduler(self.pets)
-        return self.scheduler
